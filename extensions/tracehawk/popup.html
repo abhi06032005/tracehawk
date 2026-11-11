@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TraceHawk Recorder</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="header">
+    <div class="logo">TraceHawk</div>
+    <div id="conn-status" class="badge badge-offline">Checking...</div>
+  </div>
+
+  <div id="recording-view" class="view" hidden>
+    <div class="recording-banner">
+      <span class="pulsing-dot"></span>
+      <strong>Recording in progress</strong>
+    </div>
+    <div id="recording-url" class="url-display"></div>
+    <p class="hint-text">All HTTP/HTTPS network requests, headers, and responses from this tab are being captured.</p>
+    <button id="btn-stop" class="btn btn-danger">Stop & Save Session</button>
+    <a id="btn-view-live" class="btn btn-outline" target="_blank">View Live Traffic →</a>
+  </div>
+
+  <div id="idle-view" class="view">
+    <div class="current-tab-box">
+      <div class="label">Current Active Tab</div>
+      <div id="current-tab-url" class="url-display">Loading tab...</div>
+      <p class="hint-text">Sign in to your application before recording. For Google login, finish signing in first, return to your application tab, then record it.</p>
+      <button id="btn-record-current" class="btn btn-primary" disabled>Record This Tab</button>
+    </div>
+
+    <div class="divider"><span>OR OPEN SAVED PROJECT</span></div>
+
+    <div class="form-group">
+      <label for="project-select">Saved Project</label>
+      <select id="project-select">
+        <option value="">Loading projects...</option>
+      </select>
+    </div>
+    <button id="btn-open-record" class="btn btn-secondary">Open in New Tab & Record</button>
+  </div>
+
+  <div id="status-msg" class="status-msg"></div>
+
+  <div class="footer">
+    <a href="http://localhost:3001" target="_blank">Open TraceHawk Dashboard →</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+

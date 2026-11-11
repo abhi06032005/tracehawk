@@ -1,0 +1,38 @@
+{
+  "name": "tracehawk",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "predev": "node scripts/prepare-dev.mjs",
+    "dev": "concurrently --kill-others -n \"server,web\" -c \"blue,cyan\" \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:server": "npm --workspace=apps/server run dev",
+    "dev:web": "npm --workspace=apps/web run dev",
+    "build": "npm --workspace=apps/server run build && npm --workspace=apps/web run build",
+    "db:migrate": "npm --workspace=apps/server run db:migrate",
+    "db:push": "npm --workspace=apps/server run db:push",
+    "db:generate": "npm --workspace=apps/server run db:generate",
+    "db:studio": "npm --workspace=apps/server run db:studio",
+    "test": "npm --workspace=apps/server run test",
+    "test:integration": "npm --workspace=apps/server run test:integration",
+    "test:recorder": "npm --workspace=apps/server run test:recorder",
+    "test:ui": "node scripts/audit-ui-check.mjs",
+    "test:ai:live": "npm --workspace=apps/server run test:ai:live",
+    "benchmark": "npm --workspace=apps/server run benchmark --"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "security",
+    "browser",
+    "devtools",
+    "playwright",
+    "inspection",
+    "audit"
+  ],
+  "author": "",
+  "license": "Apache-2.0"
+}

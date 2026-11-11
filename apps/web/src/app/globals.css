@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --border: #e2e8f0;
+    --sidebar-background: #ffffff;
+    --sidebar-foreground: #334155;
+    --sidebar-border: #e2e8f0;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom Scrollbar for Network Inspector & JSON viewers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Monospace Code font */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.chat-prose{font-size:14px;line-height:1.85;overflow-wrap:anywhere}.chat-prose p{margin:0 0 12px}.chat-prose h1,.chat-prose h2,.chat-prose h3{font-weight:600;margin:20px 0 8px;font-size:16px}.chat-prose ul,.chat-prose ol{padding-left:22px;margin:10px 0 16px}.chat-prose ul{list-style:disc}.chat-prose ol{list-style:decimal}.chat-prose pre{white-space:pre-wrap;background:#eeede9;border:1px solid #deddd7;border-radius:8px;padding:14px;margin:12px 0;overflow:auto;font-size:12px}.chat-prose code{font-family:monospace;font-size:12px}.chat-prose a{text-decoration:underline}.chat-prose blockquote{border-left:2px solid #d6d3d1;padding-left:16px;color:#78716c}

@@ -1,0 +1,153 @@
+{
+  "id": "juice-shop-baseline-01",
+  "name": "OWASP Juice Shop Baseline Vulnerability Suite",
+  "targetUrl": "http://127.0.0.1:3000",
+  "evidence": {
+    "targetUrl": "http://127.0.0.1:3000",
+    "endpointInventory": [
+      { "method": "GET", "url": "http://127.0.0.1:3000/", "statuses": [200] },
+      { "method": "POST", "url": "http://127.0.0.1:3000/rest/user/login", "statuses": [200, 401], "parameters": ["email", "password"] },
+      { "method": "GET", "url": "http://127.0.0.1:3000/rest/user/profile", "statuses": [200], "parameters": ["id"] },
+      { "method": "GET", "url": "http://127.0.0.1:3000/rest/products/search", "statuses": [200, 500], "parameters": ["q"] },
+      { "method": "OPTIONS", "url": "http://127.0.0.1:3000/api/products", "statuses": [200] },
+      { "method": "GET", "url": "http://127.0.0.1:3000/#/score-board", "statuses": [200] }
+    ],
+    "exchanges": [
+      {
+        "id": "ex-001",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/",
+        "statusCode": 200,
+        "resourceType": "document",
+        "requestHeaders": { "accept": "text/html" },
+        "responseHeaders": {
+          "content-type": "text/html; charset=utf-8",
+          "x-powered-by": "Express"
+        },
+        "sanitizedRequestBody": null,
+        "sanitizedResponseBody": "<!DOCTYPE html><html><head><title>OWASP Juice Shop</title></head><body><app-root></app-root></body></html>"
+      },
+      {
+        "id": "ex-002",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/rest/user/profile",
+        "statusCode": 200,
+        "resourceType": "xhr",
+        "requestHeaders": { "authorization": "Bearer [REDACTED_TOKEN]" },
+        "responseHeaders": { "content-type": "application/json" },
+        "sanitizedRequestBody": null,
+        "sanitizedResponseBody": "{\"id\": 2, \"username\": \"admin@juice-sh.op\", \"email\": \"admin@juice-sh.op\", \"role\": \"admin\"}"
+      },
+      {
+        "id": "ex-003",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/rest/products/search?q=apple%27%29%20OR%201=1--",
+        "statusCode": 200,
+        "resourceType": "fetch",
+        "requestHeaders": { "accept": "application/json" },
+        "responseHeaders": { "content-type": "application/json" },
+        "sanitizedRequestBody": null,
+        "sanitizedResponseBody": "{\"status\": \"success\", \"data\": [{\"id\": 1, \"name\": \"Apple Juice\"}, {\"id\": 2, \"name\": \"Orange Juice\"}]}"
+      },
+      {
+        "id": "ex-004",
+        "method": "OPTIONS",
+        "url": "http://127.0.0.1:3000/api/products",
+        "statusCode": 200,
+        "resourceType": "fetch",
+        "requestHeaders": { "origin": "https://evil.invalid", "access-control-request-method": "GET" },
+        "responseHeaders": {
+          "access-control-allow-origin": "*",
+          "access-control-allow-methods": "GET, POST, OPTIONS"
+        },
+        "sanitizedRequestBody": null,
+        "sanitizedResponseBody": null
+      }
+    ],
+    "storageObservations": [
+      {
+        "origin": "http://127.0.0.1:3000",
+        "storageType": "LOCAL_STORAGE",
+        "key": "token",
+        "sanitizedValue": "[OMITTED]",
+        "metadata": { "format": "JWT", "algorithm": "HS256", "hasIssuer": true, "hasSubject": true }
+      },
+      {
+        "origin": "http://127.0.0.1:3000",
+        "storageType": "LOCAL_STORAGE",
+        "key": "email",
+        "sanitizedValue": "user@example.com"
+      }
+    ],
+    "sourceSnippets": [
+      {
+        "file": "routes/search.ts",
+        "startLine": 14,
+        "endLine": 22,
+        "codeSnippet": "models.sequelize.query(`SELECT * FROM Products WHERE ((name LIKE '%${req.query.q}%' OR description LIKE '%${req.query.q}%') AND deletedAt IS NULL) ORDER BY name`)"
+      }
+    ],
+    "passiveFindings": [
+      {
+        "title": "Missing Content Security Policy (CSP) Header",
+        "category": "HEADERS",
+        "cweId": "CWE-693",
+        "severity": "MEDIUM"
+      },
+      {
+        "title": "Sensitive Token Stored in HTML5 localStorage",
+        "category": "STORAGE",
+        "cweId": "CWE-922",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  "groundTruthVulnerabilities": [
+    {
+      "id": "GT-01",
+      "title": "Missing Content Security Policy (CSP)",
+      "endpoint": "/",
+      "cwe": "CWE-693",
+      "category": "HEADERS",
+      "expectedFound": true,
+      "description": "The root document lacks a Content-Security-Policy header."
+    },
+    {
+      "id": "GT-02",
+      "title": "Broken Object-Level Authorization (BOLA)",
+      "endpoint": "/rest/user/profile",
+      "cwe": "CWE-284",
+      "category": "BOLA",
+      "expectedFound": true,
+      "description": "User profile endpoint returns arbitrary user records without verifying requester identity."
+    },
+    {
+      "id": "GT-03",
+      "title": "Sensitive Token Storage in HTML5 localStorage",
+      "endpoint": "/",
+      "cwe": "CWE-922",
+      "category": "STORAGE",
+      "expectedFound": true,
+      "description": "Bearer JWT token is stored in client-side HTML5 localStorage vulnerable to XSS exfiltration."
+    },
+    {
+      "id": "GT-04",
+      "title": "Permissive Wildcard CORS Configuration",
+      "endpoint": "/api/products",
+      "cwe": "CWE-942",
+      "category": "CORS",
+      "expectedFound": true,
+      "description": "Endpoint returns Access-Control-Allow-Origin: * to untrusted third-party origins."
+    },
+    {
+      "id": "GT-05",
+      "title": "SQL Injection in Product Search Query",
+      "endpoint": "/rest/products/search",
+      "cwe": "CWE-89",
+      "category": "INJECTION",
+      "expectedFound": true,
+      "description": "Unsanitized user search input is concatenated directly into SQL raw query string."
+    }
+  ]
+}
+

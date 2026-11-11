@@ -1,0 +1,700 @@
+{
+  "runId": "147f8769-3228-44cf-b628-a05bbfb8d546",
+  "timestamp": "2026-11-09T12:27:09.081Z",
+  "fixtureId": "juice-shop-baseline-01",
+  "fixtureName": "OWASP Juice Shop Baseline Vulnerability Suite",
+  "targetUrl": "http://127.0.0.1:3000",
+  "modelsTested": [
+    "groq",
+    "gemini"
+  ],
+  "promptVariantsTested": [
+    "default"
+  ],
+  "repeats": 1,
+  "runs": [
+    {
+      "runId": "147f8769-3228-44cf-b628-a05bbfb8d546",
+      "providerId": "groq",
+      "modelName": "qwen/qwen3.8-27b",
+      "promptVariantId": "default",
+      "repeatIndex": 1,
+      "latencyMs": 2573,
+      "tokenUsage": {
+        "promptTokens": 1775,
+        "completionTokens": 1050,
+        "totalTokens": 2825
+      },
+      "estimatedCostUsd": 0,
+      "isRefusal": false,
+      "findings": [
+        {
+          "id": "a5fbe036-0e20-443a-9595-d3d4ca03bd8d",
+          "title": "SQL Injection in Product Search",
+          "severity": "critical",
+          "status": "needs_verification",
+          "target": "http://127.0.0.1:3000",
+          "endpoint": "/rest/products/search",
+          "method": "GET",
+          "cwe": [
+            "CWE-89"
+          ],
+          "owasp_category": "injection",
+          "description": "The source code in `routes/search.ts` directly interpolates the `q` query parameter into a raw SQL string without sanitization or parameterization. An attacker can inject malicious SQL commands (e.g., `1' OR 1=1--`) to bypass filters, extract sensitive data from other tables, or potentially execute destructive commands depending on database privileges.",
+          "evidence": [],
+          "reproduction_steps": [
+            "Unauthenticated access to the search endpoint"
+          ],
+          "impact": "Data breach, data manipulation, or denial of service",
+          "remediation": "Use parameterized queries or an ORM method that handles escaping automatically. For example, use `models.Product.findAll({ where: { name: { [Op.like]: `%${q}%` } } })` instead of raw SQL.",
+          "confidence": 60,
+          "source_agent": "Benchmark Model Provider",
+          "source_tool": "groq",
+          "created_at": "2026-11-09T12:27:11.661Z",
+          "verified_at": null,
+          "source_model": "qwen/qwen3.8-27b",
+          "raw_confidence_text": "HIGH",
+          "prompt_variant_id": "default",
+          "verifier_result": {
+            "id": "e7a9e988-4488-4d6c-aa6e-0ab009e4dc61",
+            "findingId": "a5fbe036-0e20-443a-9595-d3d4ca03bd8d",
+            "status": "needs_verification",
+            "claim": "SQL Injection in Product Search",
+            "endpoint": "/rest/products/search",
+            "observations": {
+              "reason": "Automated reproduction proof generator not registered for this claim type."
+            },
+            "timestamp": "2026-11-09T12:27:11.661Z",
+            "explanation": "Requires manual verification or specialized test scenario."
+          }
+        },
+        {
+          "id": "717b287e-93f2-4af1-be03-933fb2d5e215",
+          "title": "Insecure Direct Object Reference (IDOR) in User Profile",
+          "severity": "high",
+          "status": "needs_verification",
+          "target": "http://127.0.0.1:3000",
+          "endpoint": "/rest/user/profile",
+          "method": "GET",
+          "cwe": [
+            "CWE-639"
+          ],
+          "owasp_category": "bola",
+          "description": "The endpoint accepts an `id` parameter to retrieve user profiles. If the application does not verify that the authenticated user has permission to access the specified `id` (i.e., if `id` matches the user's own ID), an attacker can iterate through IDs to access other users' profiles, including sensitive data like emails and roles.",
+          "evidence": [],
+          "reproduction_steps": [
+            "Authenticated user account"
+          ],
+          "impact": "Unauthorized access to sensitive user data, privacy violation",
+          "remediation": "Ensure that the `id` parameter matches the ID of the currently authenticated user. Alternatively, remove the `id` parameter and always return the profile of the authenticated user from the session/token.",
+          "confidence": 60,
+          "source_agent": "Benchmark Model Provider",
+          "source_tool": "groq",
+          "created_at": "2026-11-09T12:27:11.661Z",
+          "verified_at": null,
+          "source_model": "qwen/qwen3.8-27b",
+          "raw_confidence_text": "MEDIUM",
+          "prompt_variant_id": "default",
+          "verifier_result": {
+            "id": "f5356043-045b-47f2-8282-3f9bc54aa794",
+            "findingId": "717b287e-93f2-4af1-be03-933fb2d5e215",
+            "status": "needs_verification",
+            "claim": "Insecure Direct Object Reference (IDOR) in User Profile",
+            "endpoint": "/rest/user/profile",
+            "observations": {
+              "reason": "Automated reproduction proof generator not registered for this claim type."
+            },
+            "timestamp": "2026-11-09T12:27:11.661Z",
+            "explanation": "Requires manual verification or specialized test scenario."
+          }
+        },
+        {
+          "id": "8b5b1ecf-a56f-4cbc-834c-d91ed9286f75",
+          "title": "Sensitive Token Stored in localStorage",
+          "severity": "high",
+          "status": "needs_verification",
+          "target": "http://127.0.0.1:3000",
+          "endpoint": "/",
+          "method": "GET",
+          "cwe": [
+            "CWE-922"
+          ],
+          "owasp_category": "sensitive_storage",
+          "description": "The application stores the JWT authentication token in `localStorage`. Since `localStorage` is accessible via JavaScript, any Cross-Site Scripting (XSS) vulnerability can be exploited to steal the token, leading to account takeover.",
+          "evidence": [],
+          "reproduction_steps": [
+            "Presence of an XSS vulnerability or malicious script execution"
+          ],
+          "impact": "Session hijacking, account takeover",
+          "remediation": "Store tokens in `HttpOnly` cookies to prevent access via JavaScript. If using localStorage, ensure strict CSP and input validation to mitigate XSS risks.",
+          "confidence": 60,
+          "source_agent": "Benchmark Model Provider",
+          "source_tool": "groq",
+          "created_at": "2026-11-09T12:27:11.661Z",
+          "verified_at": null,
+          "source_model": "qwen/qwen3.8-27b",
+          "raw_confidence_text": "HIGH",
+          "prompt_variant_id": "default",
+          "verifier_result": {
+            "id": "0b48604e-ccc4-48c5-8dd2-096155840a12",
+            "findingId": "8b5b1ecf-a56f-4cbc-834c-d91ed9286f75",
+            "status": "needs_verification",
+            "claim": "Sensitive Token Stored in localStorage",
+            "endpoint": "/",
+            "observations": {
+              "reason": "Automated reproduction proof generator not registered for this claim type."
+            },
+            "timestamp": "2026-11-09T12:27:11.661Z",
+            "explanation": "Requires manual verification or specialized test scenario."
+          }
+        },
+        {
+          "id": "fb1ecb9b-7306-4e32-8b50-da806ef191c2",
+          "title": "Missing Content Security Policy (CSP) Header",
+          "severity": "medium",
+          "status": "verified",
+          "target": "http://127.0.0.1:3000",
+          "endpoint": "/",
+          "method": "GET",
+          "cwe": [
+            "CWE-693"
+          ],
+          "owasp_category": "missing_csp",
+          "description": "The absence of a Content Security Policy header allows the browser to execute inline scripts and load resources from untrusted origins. This increases the risk of successful XSS attacks, which can be used to steal tokens or manipulate the DOM.",
+          "evidence": [
+            {
+              "id": "793e2650-2ce3-4762-94fb-99886aa42327",
+              "findingId": "fb1ecb9b-7306-4e32-8b50-da806ef191c2",
+              "status": "verified",
+              "claim": "Missing Content Security Policy (CSP) Header",
+              "endpoint": "/",
+              "observations": {
+                "checkedHeader": "content-security-policy",
+                "headerObserved": null,
+                "result": "Header is missing or ineffective"
+              },
+              "timestamp": "2026-11-09T12:27:11.662Z",
+              "explanation": "Deterministic verification confirmed missing content-security-policy header."
+            }
+          ],
+          "reproduction_steps": [
+            "None (passive finding)"
+          ],
+          "impact": "Increased risk of XSS attacks, data theft",
+          "remediation": "Implement a strict CSP header that restricts script sources to trusted origins and disallows inline scripts.",
+          "confidence": 95,
+          "source_agent": "Benchmark Model Provider",
+          "source_tool": "groq",
+          "created_at": "2026-11-09T12:27:11.661Z",
+          "verified_at": "2026-11-09T12:27:11.662Z",
+          "source_model": "qwen/qwen3.8-27b",
+          "raw_confidence_text": "HIGH",
+          "prompt_variant_id": "default",
+          "verifier_result": {
+            "id": "793e2650-2ce3-4762-94fb-99886aa42327",
+            "findingId": "fb1ecb9b-7306-4e32-8b50-da806ef191c2",
+            "status": "verified",
+            "claim": "Missing Content Security Policy (CSP) Header",
+            "endpoint": "/",
+            "observations": {
+              "checkedHeader": "content-security-policy",
+              "headerObserved": null,
+              "result": "Header is missing or ineffective"
+            },
+            "timestamp": "2026-11-09T12:27:11.662Z",
+            "explanation": "Deterministic verification confirmed missing content-security-policy header."
+          }
+        },
+        {
+          "id": "b4355fa2-f6cd-4449-8237-0360cf5dbccc",
+          "title": "Overly Permissive CORS Policy",
+          "severity": "medium",
+          "status": "needs_verification",
+          "target": "http://127.0.0.1:3000",
+          "endpoint": "/api/products",
+          "method": "GET",
+          "cwe": [
+            "CWE-942"
+          ],
+          "owasp_category": "cors",
+          "description": "The `Access-Control-Allow-Origin` header is set to `*`, allowing any origin to make cross-origin requests to the API. If the API endpoints are sensitive or require authentication, this could lead to unauthorized data access or CSRF-like attacks if credentials are included.",
+          "evidence": [],
+          "reproduction_steps": [
+            "None (passive finding)"
+          ],
+          "impact": "Cross-origin data leakage, potential CSRF",
+          "remediation": "Restrict `Access-Control-Allow-Origin` to specific trusted origins. Avoid using `*` for endpoints that handle sensitive data or require authentication.",
+          "confidence": 85,
+          "source_agent": "Benchmark Model Provider",
+          "source_tool": "groq",
+          "created_at": "2026-11-09T12:27:11.661Z",
+          "verified_at": null,
+          "source_model": "qwen/qwen3.8-27b",
+          "raw_confidence_text": "HIGH",
+          "prompt_variant_id": "default",
+          "verifier_result": {
+            "id": "69bdc4df-e504-4136-9b90-9d7baaef9397",
+            "findingId": "b4355fa2-f6cd-4449-8237-0360cf5dbccc",
+            "status": "needs_verification",
+            "claim": "Overly Permissive CORS Policy",
+            "endpoint": "/api/products",
+            "observations": {
+              "limitation": "Active probe skipped: active testing disabled or budget depleted."
+            },
+            "timestamp": "2026-11-09T12:27:11.662Z",
+            "explanation": "CORS reflection probe requires active test authorization."
+          }
+        }
+      ],
+      "truePositives": [
+        "GT-05",
+        "GT-02",
+        "GT-03",
+        "GT-01",
+        "GT-04"
+      ],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "declined": [],
+      "precision": 1,
+      "recall": 1,
+      "f1Score": 1
+    },
+    {
+      "runId": "147f8769-3228-44cf-b628-a05bbfb8d546",
+      "providerId": "gemini",
+      "modelName": "gemini-flash-lite-latest",
+      "promptVariantId": "default",
+      "repeatIndex": 1,
+      "latencyMs": 4212,
+      "tokenUsage": {
+        "promptTokens": 1799,
+        "completionTokens": 784,
+        "totalTokens": 2583
+      },
+      "estimatedCostUsd": 0,
+      "isRefusal": false,
+      "findings": [
+        {
+          "id": "d242a325-99d8-4abb-8f6e-08bd7670f6ef",
+          "title": "SQL Injection in Product Search",
+          "severity": "critical",
+          "status": "needs_verification",
+          "target": "http://127.0.0.1:3000",
+          "endpoint": "/rest/products/search",
+          "method": "GET",
+          "cwe": [
+            "CWE-89"
+          ],
+          "owasp_category": "injection",
+          "description": "An attacker supplies specially crafted SQL syntax via the 'q' parameter, which is directly concatenated into the Sequelize raw query without parameterization, allowing manipulation of the query logic and unauthorized data retrieval.",
+          "evidence": [],
+          "reproduction_steps": [
+            "None, publicly accessible endpoint."
+          ],
+          "impact": "Extraction of sensitive database contents, data destruction, or potential remote code execution depending on database configuration.",
+          "remediation": "Use parameterized queries or ORM query builders instead of direct string concatenation with user input.",
+          "confidence": 60,
+          "source_agent": "Benchmark Model Provider",
+          "source_tool": "gemini",
+          "created_at": "2026-11-09T12:27:15.875Z",
+          "verified_at": null,
+          "source_model": "gemini-flash-lite-latest",
+          "raw_confidence_text": "HIGH",
+          "prompt_variant_id": "default",
+          "verifier_result": {
+            "id": "685482c4-793e-4d46-a40b-f2f9de1e9c71",
+            "findingId": "d242a325-99d8-4abb-8f6e-08bd7670f6ef",
+            "status": "needs_verification",
+            "claim": "SQL Injection in Product Search",
+            "endpoint": "/rest/products/search",
+            "observations": {
+              "reason": "Automated reproduction proof generator not registered for this claim type."
+            },
+            "timestamp": "2026-11-09T12:27:15.875Z",
+            "explanation": "Requires manual verification or specialized test scenario."
+          }
+        },
+        {
+          "id": "19640c12-47f0-461e-8be1-eb966fd129ff",
+          "title": "Overly Permissive Cross-Origin Resource Sharing (CORS)",
+          "severity": "medium",
+          "status": "needs_verification",
+          "target": "http://127.0.0.1:3000",
+          "endpoint": "/api/products",
+          "method": "GET",
+          "cwe": [
+            "CWE-942"
+          ],
+          "owasp_category": "cors",
+          "description": "The server responds with 'Access-Control-Allow-Origin: *', permitting any domain to read responses from authenticated or sensitive API endpoints using cross-site XMLHttpRequests or Fetch API calls.",
+          "evidence": [],
+          "reproduction_steps": [
+            "None."
+          ],
+          "impact": "Data leakage of sensitive resources to arbitrary third-party websites if users visit malicious sites while logged into the application.",
+          "remediation": "Restrict the Access-Control-Allow-Origin header to trusted, specific origins instead of using a wildcard (*).",
+          "confidence": 85,
+          "source_agent": "Benchmark Model Provider",
+          "source_tool": "gemini",
+          "created_at": "2026-11-09T12:27:15.875Z",
+          "verified_at": null,
+          "source_model": "gemini-flash-lite-latest",
+          "raw_confidence_text": "HIGH",
+          "prompt_variant_id": "default",
+          "verifier_result": {
+            "id": "aafc2ff2-e1ae-46b1-b821-62e540224b3a",
+            "findingId": "19640c12-47f0-461e-8be1-eb966fd129ff",
+            "status": "needs_verification",
+            "claim": "Overly Permissive Cross-Origin Resource Sharing (CORS)",
+            "endpoint": "/api/products",
+            "observations": {
+              "limitation": "Active probe skipped: active testing disabled or budget depleted."
+            },
+            "timestamp": "2026-11-09T12:27:15.875Z",
+            "explanation": "CORS reflection probe requires active test authorization."
+          }
+        },
+        {
+          "id": "0208b947-8f52-400a-be7e-57e87d7a888b",
+          "title": "Sensitive JWT Stored in localStorage",
+          "severity": "high",
+          "status": "needs_verification",
+          "target": "http://127.0.0.1:3000",
+          "endpoint": "http://127.0.0.1:3000",
+          "method": "GET",
+          "cwe": [
+            "CWE-922"
+          ],
+          "owasp_category": "sensitive_storage",
+          "description": "The application stores authentication JSON Web Tokens (JWT) in HTML5 localStorage, making them easily accessible to any JavaScript running in the context of the page, making the app vulnerable to XSS-based token theft.",
+          "evidence": [],
+          "reproduction_steps": [
+            "An attacker must successfully execute arbitrary JavaScript (e.g., via a Cross-Site Scripting vulnerability)."
+          ],
+          "impact": "Complete account takeover due to persistent session hijacking.",
+          "remediation": "Store sensitive session tokens in HTTP-only, Secure cookies rather than web storage.",
+          "confidence": 60,
+          "source_agent": "Benchmark Model Provider",
+          "source_tool": "gemini",
+          "created_at": "2026-11-09T12:27:15.875Z",
+          "verified_at": null,
+          "source_model": "gemini-flash-lite-latest",
+          "raw_confidence_text": "HIGH",
+          "prompt_variant_id": "default",
+          "verifier_result": {
+            "id": "638c6ddd-3e2f-4c39-b680-6a449a2a5e05",
+            "findingId": "0208b947-8f52-400a-be7e-57e87d7a888b",
+            "status": "needs_verification",
+            "claim": "Sensitive JWT Stored in localStorage",
+            "endpoint": "http://127.0.0.1:3000",
+            "observations": {
+              "reason": "Automated reproduction proof generator not registered for this claim type."
+            },
+            "timestamp": "2026-11-09T12:27:15.875Z",
+            "explanation": "Requires manual verification or specialized test scenario."
+          }
+        },
+        {
+          "id": "8b3d4fee-7d51-40fa-9c69-d98a94e79b7e",
+          "title": "Missing Content Security Policy (CSP)",
+          "severity": "medium",
+          "status": "verified",
+          "target": "http://127.0.0.1:3000",
+          "endpoint": "/",
+          "method": "GET",
+          "cwe": [
+            "CWE-693"
+          ],
+          "owasp_category": "missing_csp",
+          "description": "The application does not return a Content Security Policy header, increasing the risk of successful Cross-Site Scripting (XSS) attacks by allowing arbitrary script execution from any source.",
+          "evidence": [
+            {
+              "id": "c67e3493-fd9c-40ac-9b08-ec6d786642f3",
+              "findingId": "8b3d4fee-7d51-40fa-9c69-d98a94e79b7e",
+              "status": "verified",
+              "claim": "Missing Content Security Policy (CSP)",
+              "endpoint": "/",
+              "observations": {
+                "checkedHeader": "content-security-policy",
+                "headerObserved": null,
+                "result": "Header is missing or ineffective"
+              },
+              "timestamp": "2026-11-09T12:27:15.875Z",
+              "explanation": "Deterministic verification confirmed missing content-security-policy header."
+            }
+          ],
+          "reproduction_steps": [
+            "Presence of an XSS vulnerability in the application."
+          ],
+          "impact": "Enables attackers to execute malicious scripts in the victim's browser context, leading to session hijacking, defacement, or data theft.",
+          "remediation": "Implement a robust Content Security Policy (CSP) header restricting script sources, styles, and connections.",
+          "confidence": 95,
+          "source_agent": "Benchmark Model Provider",
+          "source_tool": "gemini",
+          "created_at": "2026-11-09T12:27:15.875Z",
+          "verified_at": "2026-11-09T12:27:15.875Z",
+          "source_model": "gemini-flash-lite-latest",
+          "raw_confidence_text": "HIGH",
+          "prompt_variant_id": "default",
+          "verifier_result": {
+            "id": "c67e3493-fd9c-40ac-9b08-ec6d786642f3",
+            "findingId": "8b3d4fee-7d51-40fa-9c69-d98a94e79b7e",
+            "status": "verified",
+            "claim": "Missing Content Security Policy (CSP)",
+            "endpoint": "/",
+            "observations": {
+              "checkedHeader": "content-security-policy",
+              "headerObserved": null,
+              "result": "Header is missing or ineffective"
+            },
+            "timestamp": "2026-11-09T12:27:15.875Z",
+            "explanation": "Deterministic verification confirmed missing content-security-policy header."
+          }
+        }
+      ],
+      "truePositives": [
+        "GT-05",
+        "GT-04",
+        "GT-01"
+      ],
+      "falsePositives": [
+        "Sensitive JWT Stored in localStorage (http://127.0.0.1:3000)"
+      ],
+      "falseNegatives": [
+        "GT-02",
+        "GT-03"
+      ],
+      "declined": [],
+      "precision": 0.75,
+      "recall": 0.6,
+      "f1Score": 0.667
+    }
+  ],
+  "aggregates": [
+    {
+      "providerId": "groq",
+      "modelName": "qwen/qwen3.8-27b",
+      "promptVariantId": "default",
+      "totalRuns": 1,
+      "refusalCount": 0,
+      "avgLatencyMs": 2573,
+      "avgPromptTokens": 1775,
+      "avgCompletionTokens": 1050,
+      "totalCostUsd": 0,
+      "avgPrecision": 1,
+      "avgRecall": 1,
+      "avgF1Score": 1,
+      "vulnerabilityHitRates": {
+        "GT-01": {
+          "groundTruthId": "GT-01",
+          "title": "Missing Content Security Policy (CSP)",
+          "cwe": "CWE-693",
+          "hits": 1,
+          "total": 1,
+          "hitRatePercent": 100
+        },
+        "GT-02": {
+          "groundTruthId": "GT-02",
+          "title": "Broken Object-Level Authorization (BOLA)",
+          "cwe": "CWE-284",
+          "hits": 1,
+          "total": 1,
+          "hitRatePercent": 100
+        },
+        "GT-03": {
+          "groundTruthId": "GT-03",
+          "title": "Sensitive Token Storage in HTML5 localStorage",
+          "cwe": "CWE-922",
+          "hits": 1,
+          "total": 1,
+          "hitRatePercent": 100
+        },
+        "GT-04": {
+          "groundTruthId": "GT-04",
+          "title": "Permissive Wildcard CORS Configuration",
+          "cwe": "CWE-942",
+          "hits": 1,
+          "total": 1,
+          "hitRatePercent": 100
+        },
+        "GT-05": {
+          "groundTruthId": "GT-05",
+          "title": "SQL Injection in Product Search Query",
+          "cwe": "CWE-89",
+          "hits": 1,
+          "total": 1,
+          "hitRatePercent": 100
+        }
+      }
+    },
+    {
+      "providerId": "gemini",
+      "modelName": "gemini-flash-lite-latest",
+      "promptVariantId": "default",
+      "totalRuns": 1,
+      "refusalCount": 0,
+      "avgLatencyMs": 4212,
+      "avgPromptTokens": 1799,
+      "avgCompletionTokens": 784,
+      "totalCostUsd": 0,
+      "avgPrecision": 0.75,
+      "avgRecall": 0.6,
+      "avgF1Score": 0.667,
+      "vulnerabilityHitRates": {
+        "GT-01": {
+          "groundTruthId": "GT-01",
+          "title": "Missing Content Security Policy (CSP)",
+          "cwe": "CWE-693",
+          "hits": 1,
+          "total": 1,
+          "hitRatePercent": 100
+        },
+        "GT-02": {
+          "groundTruthId": "GT-02",
+          "title": "Broken Object-Level Authorization (BOLA)",
+          "cwe": "CWE-284",
+          "hits": 0,
+          "total": 1,
+          "hitRatePercent": 0
+        },
+        "GT-03": {
+          "groundTruthId": "GT-03",
+          "title": "Sensitive Token Storage in HTML5 localStorage",
+          "cwe": "CWE-922",
+          "hits": 0,
+          "total": 1,
+          "hitRatePercent": 0
+        },
+        "GT-04": {
+          "groundTruthId": "GT-04",
+          "title": "Permissive Wildcard CORS Configuration",
+          "cwe": "CWE-942",
+          "hits": 1,
+          "total": 1,
+          "hitRatePercent": 100
+        },
+        "GT-05": {
+          "groundTruthId": "GT-05",
+          "title": "SQL Injection in Product Search Query",
+          "cwe": "CWE-89",
+          "hits": 1,
+          "total": 1,
+          "hitRatePercent": 100
+        }
+      }
+    }
+  ],
+  "comparisonTable": [
+    {
+      "model": "qwen/qwen3.8-27b",
+      "promptVariant": "default",
+      "vulnerabilityClass": "HEADERS",
+      "vulnerabilityTitle": "Missing Content Security Policy (CSP)",
+      "groundTruthId": "GT-01",
+      "status": "confirmed",
+      "hitRate": "1/1 (100%)",
+      "avgLatencyMs": 2573,
+      "costPerRunUsd": 0
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "promptVariant": "default",
+      "vulnerabilityClass": "BOLA",
+      "vulnerabilityTitle": "Broken Object-Level Authorization (BOLA)",
+      "groundTruthId": "GT-02",
+      "status": "confirmed",
+      "hitRate": "1/1 (100%)",
+      "avgLatencyMs": 2573,
+      "costPerRunUsd": 0
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "promptVariant": "default",
+      "vulnerabilityClass": "STORAGE",
+      "vulnerabilityTitle": "Sensitive Token Storage in HTML5 localStorage",
+      "groundTruthId": "GT-03",
+      "status": "confirmed",
+      "hitRate": "1/1 (100%)",
+      "avgLatencyMs": 2573,
+      "costPerRunUsd": 0
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "promptVariant": "default",
+      "vulnerabilityClass": "CORS",
+      "vulnerabilityTitle": "Permissive Wildcard CORS Configuration",
+      "groundTruthId": "GT-04",
+      "status": "confirmed",
+      "hitRate": "1/1 (100%)",
+      "avgLatencyMs": 2573,
+      "costPerRunUsd": 0
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "promptVariant": "default",
+      "vulnerabilityClass": "INJECTION",
+      "vulnerabilityTitle": "SQL Injection in Product Search Query",
+      "groundTruthId": "GT-05",
+      "status": "confirmed",
+      "hitRate": "1/1 (100%)",
+      "avgLatencyMs": 2573,
+      "costPerRunUsd": 0
+    },
+    {
+      "model": "gemini-flash-lite-latest",
+      "promptVariant": "default",
+      "vulnerabilityClass": "HEADERS",
+      "vulnerabilityTitle": "Missing Content Security Policy (CSP)",
+      "groundTruthId": "GT-01",
+      "status": "confirmed",
+      "hitRate": "1/1 (100%)",
+      "avgLatencyMs": 4212,
+      "costPerRunUsd": 0
+    },
+    {
+      "model": "gemini-flash-lite-latest",
+      "promptVariant": "default",
+      "vulnerabilityClass": "BOLA",
+      "vulnerabilityTitle": "Broken Object-Level Authorization (BOLA)",
+      "groundTruthId": "GT-02",
+      "status": "missed",
+      "hitRate": "0/1 (0%)",
+      "avgLatencyMs": 4212,
+      "costPerRunUsd": 0
+    },
+    {
+      "model": "gemini-flash-lite-latest",
+      "promptVariant": "default",
+      "vulnerabilityClass": "STORAGE",
+      "vulnerabilityTitle": "Sensitive Token Storage in HTML5 localStorage",
+      "groundTruthId": "GT-03",
+      "status": "missed",
+      "hitRate": "0/1 (0%)",
+      "avgLatencyMs": 4212,
+      "costPerRunUsd": 0
+    },
+    {
+      "model": "gemini-flash-lite-latest",
+      "promptVariant": "default",
+      "vulnerabilityClass": "CORS",
+      "vulnerabilityTitle": "Permissive Wildcard CORS Configuration",
+      "groundTruthId": "GT-04",
+      "status": "confirmed",
+      "hitRate": "1/1 (100%)",
+      "avgLatencyMs": 4212,
+      "costPerRunUsd": 0
+    },
+    {
+      "model": "gemini-flash-lite-latest",
+      "promptVariant": "default",
+      "vulnerabilityClass": "INJECTION",
+      "vulnerabilityTitle": "SQL Injection in Product Search Query",
+      "groundTruthId": "GT-05",
+      "status": "confirmed",
+      "hitRate": "1/1 (100%)",
+      "avgLatencyMs": 4212,
+      "costPerRunUsd": 0
+    }
+  ]
+}

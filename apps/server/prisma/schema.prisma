@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Project {
+  id             String    @id @default(uuid())
+  name           String
+  targetUrl      String
+  allowedOrigins String[]
+  createdAt      DateTime  @default(now())
+  sessions       Session[]
+
+  @@map("projects")
+}
+
+model Session {
+  id                  String               @id @default(uuid())
+  projectId           String
+  project             Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status              String               @default("RECORDING") // RECORDING, PAUSED, STOPPED, ANALYZED
+  startedAt           DateTime             @default(now())
+  endedAt             DateTime?
+  totalRequests       Int                  @default(0)
+  totalErrors         Int                  @default(0)
+  httpExchanges       HttpExchange[]
+  browserEvents       BrowserEvent[]
+  storageObservations StorageObservation[]
+  findings            Finding[]
+  analysisRuns        AnalysisRun[]
+  investigations      Investigation[]
+
+  @@index([projectId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("sessions")
+}
+
+model HttpExchange {
+  id                    String   @id @default(uuid())
+  sessionId             String
+  session               Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  timestamp             DateTime @default(now())
+  method                String
+  url                   String
+  statusCode            Int?
+  requestHeaders        Json?
+  responseHeaders       Json?
+  sanitizedRequestBody  String?
+  sanitizedResponseBody String?
+  contentType           String?
+  duration              Float?
+  resourceType          String?
+  failureReason         String?
+  pageUrl               String?
+
+  @@index([sessionId, timestamp])
+  @@index([url])
+  @@index([statusCode])
+  @@index([resourceType])
+  @@map("http_exchanges")
+}
+
+model BrowserEvent {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  timestamp DateTime @default(now())
+  type      String   // NAVIGATE, CONSOLE_ERROR, CONSOLE_WARN, TAB_OPENED, TAB_CLOSED, PAGE_CRASH, WEBSOCKET
+  message   String
+  pageUrl   String?
+  metadata  Json?
+
+  @@index([sessionId, timestamp])
+  @@index([type])
+  @@map("browser_events")
+}
+
+model StorageObservation {
+  id             String   @id @default(uuid())
+  sessionId      String
+  session        Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  origin         String
+  storageType    String   // COOKIE, LOCAL_STORAGE, SESSION_STORAGE, INDEXED_DB
+  key            String
+  sanitizedValue String?
+  metadata       Json?
+  timestamp      DateTime @default(now())
+
+  @@index([sessionId, timestamp])
+  @@index([origin])
+  @@index([storageType])
+  @@map("storage_observations")
+}
+
+model Finding {
+  id                 String   @id @default(uuid())
+  sessionId          String
+  session            Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  title              String
+  category           String   // HEADERS, COOKIES, STORAGE, INFORMATION_DISCLOSURE, CORS, ERROR_LEAK, AUTH
+  cweId              String?  // e.g. CWE-693, CWE-614, CWE-200
+  severity           String   // CRITICAL, HIGH, MEDIUM, LOW, INFO
+  confidence         String   // CERTAIN, HIGH, MEDIUM, LOW
+  verificationStatus String   // CONFIRMED_CONFIG, POTENTIAL_VULNERABILITY, INFORMATIONAL
+  description        String
+  evidence           Json
+  impact             String
+  remediation        String
+  createdAt          DateTime @default(now())
+
+  @@index([sessionId, severity])
+  @@index([category])
+  @@map("findings")
+}
+
+model AnalysisRun {
+  id           String    @id @default(uuid())
+  sessionId    String
+  session      Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  provider     String    // PASSIVE_ENGINE, AI_DEEPHAT
+  status       String    // STARTED, COMPLETED, FAILED
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  errorMessage String?
+
+  @@index([sessionId])
+  @@map("analysis_runs")
+}
+
+model Investigation {
+  id           String              @id @default(uuid())
+  sessionId    String
+  session      Session             @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  status       String              @default("PENDING") // PENDING, RUNNING, COMPLETED, CANCELLED, FAILED
+  currentStep  Int                 @default(0)
+  maxSteps     Int                 @default(10)
+  maxTimeSeconds Int              @default(120)
+  requestBudget Int               @default(10)
+  requestsUsed Int                @default(0)
+  authorized   Boolean            @default(false)
+  activeTests  Boolean            @default(false)
+  allowedOrigins String[]
+  deadline     DateTime?
+  model        String?
+  riskSummary  String?
+  startedAt    DateTime            @default(now())
+  completedAt  DateTime?
+  errorMessage String?
+  steps        InvestigationStep[]
+  hypotheses   AiHypothesis[]
+
+  @@index([sessionId, status])
+  @@map("investigations")
+}
+
+model InvestigationStep {
+  id              String        @id @default(uuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  stepNumber      Int
+  phase           String        // OBSERVE, ANALYZE, PLAN, VERIFY, EVALUATE
+  thought         String
+  toolName        String?
+  toolArgs        Json?
+  toolResult      Json?
+  decision        Json?
+  evaluation      Json?
+  approvalId      String?         @unique
+  approvalStatus  String?
+  timestamp       DateTime      @default(now())
+
+  @@index([investigationId, stepNumber])
+  @@map("investigation_steps")
+}
+
+model AiHypothesis {
+  id                   String        @id @default(uuid())
+  investigationId      String
+  investigation        Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  title                String
+  affectedEndpoint     String
+  cweCategory          String?
+  claimType            String        @default("other")
+  risk                 String        @default("INFO")
+  attackMechanism      String?
+  prerequisites        String?
+  potentialImpact      String?
+  suggestedRemediation String?
+  confidence           String        @default("MEDIUM") // HIGH, MEDIUM, LOW
+  verificationStatus   String        @default("HYPOTHESIS") // HYPOTHESIS, NEEDS_VERIFICATION, VERIFIED, REJECTED
+  supportingEvidenceIds String[]
+  verificationNotes    String?
+  createdAt            DateTime      @default(now())
+
+  @@index([investigationId, verificationStatus])
+  @@map("ai_hypotheses")
+}
